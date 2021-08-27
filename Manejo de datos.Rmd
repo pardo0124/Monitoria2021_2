@@ -1,0 +1,333 @@
+---
+title: "Monitoria 26 ago."
+output: html_notebook
+---
+
+# Activar paquetes
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(haven)
+library(readxl)
+library(knitr)
+```
+
+## Limpiar espacio de trabajo
+
+```{r}
+rm(list = ls())
+```
+
+# Importar varios conjuntos de datos usando un bucle for
+
+Para esta sección, es necesario que descarguen el archivo comprimido que se llama educación, lo descompriman y lo coloquen en la carpeta de datos dentro de su proyecto.
+
+¿Qué función se puede usar para listar los archivos que están en un directorio?
+
+```{r}
+list.files(include.dirs = T)
+dir()
+list.dirs()
+```
+
+Usando esa función vamos a crear un vector que contenga los nombres de los archivos que vamos a importar. Si bien esto se podría hacer manualmente, esto no es eficiente, en particular si tenemos un número grande de archivos.
+
+```{r}
+archivos <- list.files("z,Monitoria Fun.programacion/Scripts/Educación/Educación/")
+archivos
+```
+
+¿Cómo se importaría UNO de estos archivos'
+
+```{r}
+educacion <- read_csv("z,Monitoria Fun.programacion/Scripts/Educación/Educación/educación_2011.csv")
+```
+
+Con el vector que creamos y la función anterior ya podemos realizar el proceso de importación:
+
+```{r}
+x <- 1985
+assign("y", 1986)
+assign("z", x)
+
+for(i in seq_along(archivos)){
+  datos <- read_csv(paste0("z,Monitoria Fun.programacion/Scripts/Educación/Educación/", archivos[i]))
+ assign(archivos[i], datos) 
+}  
+ 
+```
+
+La función `bind_rows` de dplyr permite agregar filas a una base de datos. ¿Cómo se podría modificar este loop para unir todos los archivos en una sola base?
+
+```{r}
+educacion <- tibble()
+
+for(i in seq_along(archivos)){
+  datos <- read_csv(paste0("z,Monitoria Fun.programacion/Scripts/Educación/Educación/", archivos[i]))
+  educacion <- bind_rows(educacion, datos)
+}  
+```
+
+# Importar varios conjuntos de datos usando map
+
+¿Cómo podrían hacer lo que acaban de hacer usando la función map?
+
+```{r}
+datos <- archivos %>% 
+  map(~ read_csv(paste0("z,Monitoria Fun.programacion/Scripts/Educación/Educación/", .))) 
+datos2 <- bind_rows(datos)
+```
+
+Revise la ayuda de la función `reduce`. ¿Cómo podría complementarse la anterior función aprovechando esta función?
+
+```{r}
+datos <- archivos %>% 
+  map(~ read_csv(paste0("z,Monitoria Fun.programacion/Scripts/Educación/Educación/", .))) %>% 
+  reduce(bind_rows)
+```
+
+# Transformar bases de datos
+
+¿Qué es tidy data i.e. datos limpios para análisis de datos?
+
+Los datos limpios en este contexto cumplen 3 reglas:
+
+1.  Cada variable debe tener su propia columna.
+2.  Cada observación debe tener su propia fila.
+3.  Cada valor debe tener su propia celda.
+
+![](tidy-1.png)
+
+¿Cuál de las siguientes bases de datos son "tidy"? [\<https://r4ds.had.co.nz/tidy-data.html\#tidy-data-1\>](https://r4ds.had.co.nz/tidy-data.html#tidy-data-1){.uri}
+
+-   No todos los datos están estructurados de esta manera. Hay dos problemas comunes:
+
+    1.  Una variable puede estar repartida en varias columnas.
+    2.  Una observación puede estar repartida en varias filas.
+
+## Reorganizar de ancho a largo
+
+1.  Importen el conjunto de datos `IPC_Indices.xlsx`. Estos datos contienen la tasa de crecimiento del PIB para varios países entre 2009 y 2018.
+
+```{r}
+ipc <- read_excel("z,Monitoria Fun.programacion/Scripts/IPC_Indices.xlsx", range = "A9:R21")
+```
+
+2.  Usen la función `head()` para ver el contenido del conjunto de datos.
+
+```{r}
+head(ipc)
+```
+
+3.  ¿Es un conjunto de datos limpio?
+
+Cuando el conjunto de datos tiene el problema 1, usamos la función `pivot_longer()` del paquete tidyr para limpiarlo:
+
+La función `pivot_longer` tiene cuatro argumentos:
+
+1.  El conjunto de datos que se va a reformar o reorientar.
+2.  *cols*: Las columnas que se van a reformar o reorientar.
+3.  *names_to*: El nombre de la variable que se creará en la que van a quedar los valores que actualmente aparecen en los nombres de las columnas.
+4.  *values_to*: El nombre de la variable que se creará en la que van a quedar los valores que actualmente aparecen en las celdas de la base de datos.
+
+En el caso del conjunto gdp_growth_wide la función operaría de la siguiente manera:
+
+```{r}
+ipc_larga <- pivot_longer(ipc, 
+                          cols = `2003`:`2019`, 
+                          names_to = "ano", 
+                          values_to = "ipc")
+head(ipc_larga)
+```
+
+## Reorganizar de largo a ancho
+
+1.  Importen el conjunto de datos `gdp.csv`. Estos datos contienen el pib per capita y la tasa de crecimiento para un grupo de países entre 2009 y 2018.
+
+```{r}
+gdp <- read_csv("z,Monitoria Fun.programacion/Scripts/gdp.csv")
+```
+
+2.  Usen la función head para ver el contenido del conjunto de datos.
+
+```{r}
+head(gdp)
+```
+
+3.  ¿Es un conjunto de datos limpio?
+
+4.  Cuando el conjunto de datos tiene el problema 2, usamos la función `pivot_wider()` del paquete tidyr para limpiarlo:
+
+La función `pivot_wider()` tiene 3 argumentos:
+
+1.  El conjunto de datos.
+2.  *names_from*: El nombre de la variable del conjunto actual en la que están los nombres de las variables.
+3.  *values_from*: El nombre de la variable del conjunto actual en la que están los valores que corresponden a cada variable.
+
+En el caso del conjunto deptos la función operaría de la siguiente manera:
+
+```{r}
+gdp_ancha <- pivot_wider(gdp, 
+                   names_from =`Series Name`, 
+                   values_from =  valores)
+head(gdp_ancha)
+```
+
+# Unir bases de datos con distintas variables sobre algunos individuos
+
+Dos casos en los que es común unir bases de datos con distintas variables sobre los mismos individuos:
+
+-   En un mismo archivo, distintas bases de datos tienen variables para los mismos individuos. Por ejemplo, Encuesta Multipropósito de Bogotá o Panel Municipal CEDE.
+
+-   Una base de datos tienen información para individuos, y otra u otras tienen información para unidades de agrupación dentro de las que se encuentran esos individuos. Por ejemplo: estudiantes-colegios, colegios-municipios, individuos-hogares, individuos-firmas, etc.
+
+En esos casos RStudio y el paquete dplyr proveen distintas funciones, según sea el caso y el objetivo de la unión.
+
+Estas funciones cruzan las observaciones según una o varias variables que sirven de "llave" e identifica observaciones en las dos bases de datos, y luego copia las variables de una base a la otra. Hay varias opciones:
+
+## Inner Join:
+
+![](innerjoin.PNG)
+
+Solamente une las observaciones que se encuentran en las dos bases de datos:
+
+## Outer Join:
+
+-   **Left Join:** Mantiene todas las observaciones de la primera base de datos.
+-   **Right Join:** Mantiene todas las observaciones de la segunda base de datos base de datos.
+-   **Full Join** Mantiene todas las observaciones de las dos bases de datos, así no hayan cruces.
+
+![](outerjoin.PNG)
+
+## Ejemplo 1
+
+Voy a generar datos ficticios para crear dos bases. Primer fijo la semilla para que esto sea reproducible:
+
+```{r}
+set.seed(18032021)
+```
+
+Luego creo el número de identificación de los registros de la primera base y los organizo en orden ascendente:
+
+```{r}
+id <- sample(1:15, 10, replace = FALSE)
+id <- sort(id)
+```
+
+Ahora genero una variable que se llama edad:
+
+```{r}
+edad <- sample(18:22, 10, replace = TRUE)
+```
+
+Por último, uno la identificación y la edad en un tibble:
+
+```{r}
+base1 <- tibble(id, edad)
+base1
+```
+
+Ahora, creo el número de identificación de los registros de la segunda base y los organizo en orden ascendente:
+
+```{r}
+id <- sample(1:15, 10, replace = FALSE)
+id <- sort(id)
+```
+
+Luego creo una variable que se llama genero:
+
+```{r}
+genero <- sample(c("femenino", "masculino"), 10, replace = TRUE)
+```
+
+Y uno las dos variables en un tibble:
+
+```{r}
+base2 <- tibble(id, genero)
+base2
+```
+
+Podría usar las funciones `intersect`, `union` y `setdiff` para explorar las relaciones entre los identificaciones de las dos tablas que cree.
+
+`intersect` me muestra la intersección entre las dos columnas, es decir las identificaciones que son comunes a las dos tablas:
+
+```{r}
+intersect(base1$id, base2$id)
+```
+
+`union` me muestra la union de las dos columnas, es decir todas las identificaciones que están en las tablas:
+
+```{r}
+union(base1$id, base2$id)
+```
+
+`setdiff` me indica cuáles elementos aparecen en el primer conjunto pero no en el segundo:
+
+```{r}
+setdiff(base1$id, base2$id)
+```
+
+```{r}
+setdiff(base2$id, base1$id)
+```
+
+Ahora, voy a ilustrar las distintas maneras de hacer la unión. `inner_join` une solamente las observaciones que encuentra en las dos bases:
+
+```{r}
+inner_join(base1, base2)
+```
+
+`left_join` mantiene las observaciones de la base de la izquierda. La base de la izquierda es la primera que se incluye dentro de la función. Si no hay información para estas variables en la base de la derecha (la segunda que se incluye dentro de la función), dejan los valores como valores faltantes:
+
+```{r}
+x <- left_join(base1, base2, by = "id")
+
+```
+
+`right_join` mantiene las observaciones de la base de la derecha. Si no hay información para estas variables en la base de la izquierda , dejan los valores como valores faltantes:
+
+```{r}
+x <- right_join(base1, base2, by = "id")
+```
+
+`full_join` une todas las observaciones y si en alguna de las bases no hay información para alguno de los registros los deja como valores faltantes:
+
+```{r}
+x <- full_join(base1, base2, by = "id")
+
+base_resultante <- full_join(base1, base2, by = "id")
+
+base_resultante <- base_resultante %>% arrange(edad, id)
+base_resultante
+```
+
+# Transformacion de variables
+
+## Importación de la base Covid-19
+
+```{r}
+covid_19 <- read_csv("https://www.datos.gov.co/api/views/gt2j-8ykr/rows.csv?accessType=DOWNLOAD")
+covid_19 <- read.csv("Casos_positivos_de_COVID-19_en_Colombia.csv")
+
+```
+
+## Cambio de nombre de la variable fecha.reporte.web
+
+```{r}
+covid_19 <- covid_19 %>% rename(fecha_reporte=fecha.reporte.web)
+```
+
+## Reconocimiento de *fecha_reporte* como fecha
+
+```{r}
+covid_19 <- covid_19 %>%  mutate(fecha_reporte=dmy_hms(fecha_reporte))
+covid_19
+```
+
+## Creación del data frame con el número de casos por día
+
+```{r}
+casos_dia <- covid_19 %>%  group_by(fecha_reporte) %>% summarise(n = n()) 
+casos_dia
+```

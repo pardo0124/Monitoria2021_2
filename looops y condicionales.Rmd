@@ -1,0 +1,603 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Activar paquete
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(gapminder)
+
+```
+
+```{r}
+rm(list = ls())
+```
+
+# Funciones
+
+-   En R se pueden crear funciones para hacer diferentes tareas.
+-   Crear funciones es útil cuando se debe hacer una tarea que se repite para varios objetos o variables.
+-   Crear funciones evita copiar y pegar código.
+-   Para crear funciones se debe usar `function()`.
+-   Las funciones se deben asignar a un objeto.
+-   La estructura de cualquier función es la siguiente:
+
+```{r, eval=FALSE}
+nombre <- function(argumentos){
+
+  OPERACIONES A EJECUTAR
+
+}
+```
+
+Por ejemplo, creemos la función diga.hola:
+
+```{r}
+diga.hola <- function(){
+
+  paste("Hello, World!")
+
+}
+
+diga.hola()
+```
+
+```{r}
+paste("Nicolás", "Pardo")
+diga.hola.per <- function(nombre){
+  paste("Hola", nombre)
+}
+diga.hola.per("Nicolás")
+```
+
+Escribamos una función que tome un número o un vector y lo eleve al cuadrado. El único argumento en este caso, sería el número o vector:
+
+```{r}
+cuadrado <- function(x){
+  x ^ 2
+}
+```
+
+Use la función:
+
+```{r}
+cuadrado(10)
+```
+
+-   Creen una función para calcular cualquier potencia. Prueben que la función opera correctamente.
+
+```{r}
+potencia <- function(a,b){
+  a^b
+}
+potencia(10, 2)
+```
+
+-   ¿Cómo podría modificarse la función para que el exponente sea 2 si no se ingresa ningún valor?
+
+```{r}
+potencia <- function(a, b = 2){
+  a ^ b
+}
+potencia(10)
+potencia(10, 4)
+```
+
+
+Por defecto, las funciones retornan del valor correspondiente a la última línea de código dentro de la función. Por ejemplo, al ejecutar la siguiente función solamente se muestra el resultado de la última fila:
+
+```{r}
+suma1 <- function(x,y){
+  a <- x
+  b <- y
+  a * b
+  a + b
+}
+
+suma1(5, 4)
+```
+
+Una mejor práctica es usar la función *return* para indicar de manera explícita qué es lo que la función debe mostrar
+
+```{r}
+suma2 <- function(x,y){
+  a <- x
+  b <- y
+  a * b
+  return(a + b)
+}
+suma2(5,4)
+```
+
+Si se utiliza `return`, cualquier cosa que esté después es ignorada.
+
+```{r}
+suma3 <- function(x,y){
+  a <- x
+  b <- y
+  return(a * b)
+  a + b
+}
+suma3(5, 4)
+```
+
+-   Creen una función que permita calcular el coeficiente de variación de un conjunto de datos.
+
+```{r}
+cv <- function(x){
+  cv <- sd(x, na.rm = TRUE)/mean(x, na.rm = TRUE)
+  print(cv)
+}
+
+```
+
+-   Una vez la haya creado, aplique esa función la variable de PIB per capita de la base gapminder.
+
+```{r}
+library(gapminder)
+data("gapminder")
+cv(gapminder$gdpPercap)
+
+```
+
+```{r}
+prueba <- rep(c(10, 18, NA), 10)
+prueba
+mean(prueba, na.rm = TRUE)
+cv(prueba)
+```
+
+# Estructuras de control
+
+Las estructuras de control permiten controlar el flujo de la programación y hacer que pasen distintas cosas, dependiendo el resultado de una prueba lógica. El resultado de las pruebas son: TRUE o FALSE. Las principales estructuras de control son **if**, **else** e **ifelse**.
+
+## if
+
+La estructura más común es el comando **if**. La estructura de esta prueba es sencilla:
+
+1.  Pruebe una relación. Esta relación se escribe entre paréntesis al lado del comando **if**.
+2.  Si es verdad (i.e. TRUE) ejecute una acción. Esta acción se escribe entre corchetes después de los paréntesis.
+3.  Si no es verdad (i.e. FALSE) no ejecute la acción.
+
+Las pruebas usadas son, entre otras:
+
+-   Igual que: `==`
+-   Menor que: `<`
+-   Menor o igual que: `<=`
+-   Mayor que: `>`
+-   Mayor o igual que: `>=`
+-   No igual que: `!=`
+
+Otras pruebas son:
+
+-   is.numeric(), etc.
+-   is.na()
+
+#### if
+
+```{r}
+8==7
+8==8
+
+8 > 5
+5 > 8
+
+is.numeric(prueba)
+is.character(prueba)
+```
+
+Ejemplo:
+
+1.  Cree un objeto que se llame x, y asigne el valor de 5 a ese objeto
+2.  Pruebe si x es mayor a 0.
+3.  Si la prueba es verdad, escriba "Positivo".
+4.  Si no es verdad, no haga nada.
+
+```{r}
+x <- 5
+if (x > 0) {
+  print("positivo")
+}
+```
+
+Repita el ejercicio con x = -2.
+
+```{r}
+x <- -2
+if (x > 0) {
+  print("positivo")
+}
+```
+
+#### if y else
+
+El comando **else** permite ejecutar otra acción en caso que la prueba no sea verdad.
+
+Ejemplo:
+
+1.  Cree un objeto que se llame x, y asigne el valor -3
+2.  Pruebe si x es mayor a 0.
+3.  Si la prueba es verdad, escriba "Positivo".
+4.  Si no es verdad, escriba "Negativo".
+
+```{r}
+x <- 0
+if(x > 0){
+  print("positivo")
+} else {
+  print("negativo")
+  }
+```
+
+Usando los comandos **if** y **else**, cree una **función** que tome un número y realice lo siguiente:
+
+-   Si el número es mayor a cero, escriba "positivo".
+-   Si es menor a cero, escriba "negativo".
+-   Si es igual a cero, escriba "El número es 0"
+
+```{r}
+signo <- function(x) {
+  if (x >0) {
+    print("positivo") 
+  } else if(x <0){
+    print("negativo")
+  } else {
+    print("El número es 0")
+  }
+}
+
+signo(0)
+```
+
+```{r}
+signo <- function(x) {
+  if (x >0) {
+    print("positivo") 
+  } 
+  
+  if(x <0){
+    print("negativo")
+  } 
+  
+  if (x == 0) {
+    print("El número es 0")
+  }
+}
+
+signo(0)
+```
+
+Usando los comandos **if** y **else**, cree una función que tome un número y realice lo siguiente:
+
+-   Si el número es menor o igual a 10, eleve el número al cuadrado.
+-   Si el número es mayor a 10, multiplique el número por 2.
+
+Pruebe que la función opera correctamente con los números 5, 10 y 20.
+
+```{r}
+diez <- function(x){
+  if(x<=10){
+    x^2
+  } else{
+    x*2
+  }
+}
+
+diez(5)
+diez(10)
+diez(20)
+
+```
+
+```{r}
+diez <- function(x){
+  if(x <= 10){
+    print(x ^ 2)
+  }
+  if (x > 10) {
+    print(x * 2)
+  }
+}
+
+diez(10)
+diez(20)
+```
+
+Use alguno de los condicionales vistos para resolver los siguientes ejercicios:
+
+1.  Cree una función que estime el valor absoluto de un número, e imprima la siguiente expresión: "El valor absoluto de x es \_\_\_". No use la función `abs`.
+
+```{r}
+absoluto <- function(x){
+  if(x > 0) {
+    paste("El valor absoluto de", x, "es", x)
+    } 
+  else if (x < 0){
+    valor <- -x
+    paste("El valor absoluto de", x, "es", valor)
+    }
+  else{
+    paste("El valor absoluto de", x, "es", 0)
+    }
+  } 
+absoluto(-5)
+
+```
+
+2.  Cree una función que calcule la raíz cuadrada de un número. La función debe imprimir la expresión "La raíz cuadrada de x es \_\_". Si el número es negativo, el resultado debe ser NA.
+
+```{r}
+raíz_cuadrada <- function(x){
+  if(x<0){
+    print(NA)
+  } else {
+    resultado <- sqrt(x)
+    paste("La raíz cuadrada de", x, "es", resultado)
+  }
+}
+raíz_cuadrada(-3)
+raíz_cuadrada(9)
+
+```
+
+3.  Cree una función que tome dos objetos, *x* y *y*, y realice lo siguiente:
+
+    -   Verifique si *x* es un número.
+    -   Verifique si *y* es un número y si es distinto a 0.
+    -   Si se cumplen las anteriores condiciones, divida *x* por *y*.
+    -   Si no se cumplen, el resultado debe ser la siguiente expresión "Uno de los dos objetos no es un número".
+
+```{r}
+division <- function(x, y){
+  if (is.numeric(x) & is.numeric(y) & y != 0){
+    x/y
+  } else {
+    print("Uno de los dos objetos no es un número")
+  }
+}
+
+division(10, "A")
+```
+
+```{r}
+número <- function(x,y){
+  if(is.numeric(x) == TRUE & is.numeric(y) == TRUE & y != 0) {
+    paste(x/y)
+    } 
+  else {
+    print("Uno de los dos objetos no es un número")
+    }
+  } 
+número(2,-3)
+
+```
+
+# Loops: ***for***
+
+-   Un loop (ciclo) ***for*** realiza una acción de manera iterativa para los elementos contenidos o identificados en un vector.
+
+-   La estructura general de un loop (ciclo) ***for*** es la siguiente:
+
+```{r, eval=FALSE}
+for (indice in vector){
+  Realice una acción
+}
+```
+
+Por ejemplo, el siguiente loop toma los números de 1 a 10 y los muestra en la consola:
+
+```{r}
+for(i in 1:10){
+  print(i)
+}
+
+print(1)
+print(2)
+print(3)
+print(4)
+print(5)
+print(6)
+print(7)
+print(8)
+print(9)
+print(10)
+```
+
+Realice un loop que tome los números de -5 a 4 y los multiplique por dos.
+
+```{r}
+for (i in -5:4){
+  d<-i*2
+  print(d)
+}
+```
+
+```{r}
+for (i in -5:4) {
+print(i*2)
+}
+
+```
+
+Cree el siguiente vector:
+
+```{r}
+frutas <- c("manzana", "maracuyá", "feijoa")
+```
+
+¿Cómo podría tomar cada palabra y calcular el número de letras que cada una tiene y luego colocar el resultado en un vector?
+
+"Manualmente" esto implicaría lo siguiente, para un elemento:
+
+1.  Creo un vector vacío en el que posteriormente pondré los números
+
+```{r}
+tamaño <- c()
+tamaño
+
+```
+
+2.  Calculo el número de letras que tiene un elemento y lo asigno al primer elemento de ese vector:
+
+```{r}
+nchar(frutas[1])
+tamaño[1] <- nchar(frutas[1])
+tamaño
+```
+
+Si deseo hacer lo mismo para todos los elementos, tendría que repetir el proceso:
+
+```{r}
+tamaño[2] <- nchar(frutas[2])
+tamaño[3] <- nchar(frutas[3])
+tamaño
+```
+
+¿Cómo podría usar un loop para "automatizar" este proceso?
+
+Una primera alternativa sería la siguiente:
+
+```{r}
+
+
+for (i in frutas){
+  print(nchar(i))
+}
+```
+
+Vuelva a crear un vector vacío llamado *tamaño*, así:
+
+```{r}
+tamaño <- c() 
+```
+
+Modifique el loop que acaba de crear para que en el vector *tamaño* se asignen los valores correspondiente al tamaño de cada palabra.
+
+```{r}
+for (i in 1:3){
+  tamaño[i] <- nchar(frutas[i])
+}
+tamaño
+```
+
+¿Qué rol cumple i en este caso?
+
+¿Cómo hago si quiero que este loop sirva para vectores de cualquier tamaño, sin tener que escribir manualmente la secuencia en la que aplicaré el loop?
+
+`seq_along` crea una secuencia que va de 1 hasta el tamaño del vector:
+
+```{r}
+1:length(frutas)
+```
+
+```{r}
+seq_along(frutas)
+```
+
+Podemos usar `seq_along` para hacer que el loop sea aplicable a cualquier vector sin importar su tamaño:
+
+```{r}
+tamaño <- c()
+
+for (i in seq_along(frutas)){
+  tamaño[i] <- nchar(frutas[i])
+}
+tamaño
+```
+
+Este loop podría ser fácilmente aplicado a cualquier vector:
+
+```{r}
+
+set.seed(1244)
+
+palabras <- words
+palabras
+length(palabras)
+
+palabras3 <- sample(words, 200)
+
+tamaño <- c()
+
+for (i in seq_along(palabras)){
+  tamaño[i] <- nchar(palabras[i])
+}
+length(tamaño)
+tamaño[1:10]
+palabras[1:10]
+```
+
+Convierta el loop anterior en una función que pueda ser aplicada a cualquier vector que contenga palabras y cree un vector con tres nombres para probar la función. Prueba que la función opera con los vectores palabras y frutas:
+
+```{r}
+contar_letras <- function(x){
+tamaño <<- c()
+for (i in seq_along(x)){
+ tamaño[i] <<- nchar(x[i])
+} 
+  }
+contar_letras(palabras)
+summary(tamaño)
+```
+
+
+#### Punto de un taller del semestre pasado resuelto en la monitoria 
+#### utilidad de lo loops
+#### en el siguiente ejemplo se ve de una manera clara como el uso de un loop nos a yudo a importar varias bases de datos en unas pocas lineas de codigo 
+#### la base de datos "Febrero.csv/" es una carpeta de la GEIH y esta cargada en el drive 
+```{r}
+archivos <- list.files("Febrero.csv/",pattern="Cabecera|Resto")
+
+```
+
+```{r,,message = FALSE,warning = FALSE}
+for(i in seq_along(archivos)){
+  datos <- read_delim(paste0("Febrero.csv/", archivos[i]), delim=";")
+  assign(archivos[i], datos)
+}  
+```
+
+#### el siguiente codigo es usado para unir las bases de datos antes cargadas
+
+```{r}
+union <- full_join(`Cabecera - Características generales (Personas).csv`, `Cabecera - Vivienda y Hogares.csv`, by=c("DIRECTORIO","SECUENCIA_P"))
+```
+
+
+## Cálculo medias:
+
+```{r}
+puntajes <- saber11_2019 %>% select(starts_with("PUNT")) 
+puntajes <- select(saber11_2019, starts_with("PUNT"))
+
+nombres <- names(puntajes)
+
+medias1 <- c()
+
+attach(puntajes)
+
+for (i in seq_along(nombres)) {
+  medias1[i] <- mean(get(nombres[i]), na.rm = TRUE) 
+  }
+
+names(medias1) <- nombres
+ medias1
+```
+
+# Funciones apply
+
+Usando lapply:
+
+```{r}
+medias3 <- lapply(puntajes, mean, na.rm = TRUE)
+
+```
+
+Usando Sapply:
+
+```{r}
+medias4 <- sapply(puntajes, mean, na.rm = TRUE)
+```

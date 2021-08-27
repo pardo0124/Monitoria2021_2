@@ -1,0 +1,119 @@
+---
+title: "Monitoria 19 ago."
+output: html_notebook
+---
+
+```{r}
+rm(list = ls())
+library("tidyverse")
+```
+
+```{r}
+set.seed(1244)
+
+palabras <- words
+palabras
+length(palabras)
+
+palabras3 <- sample(words, 200)
+
+tamaño <- c()
+
+for (i in seq_along(palabras)){
+  tamaño[i] <- nchar(palabras[i])
+}
+length(tamaño)
+tamaño[1:10]
+palabras[1:10]
+```
+
+Luego creamos la función de contar letras:
+```{r}
+contar_letras <- function(x){
+tamaño <<- c()
+for (i in seq_along(x)){
+ tamaño[i] <<- nchar(x[i])
+} 
+  }
+contar_letras(palabras)
+summary(tamaño)
+
+```
+Listas
+```{r}
+#install.packages("gapminder")
+library(gapminder)
+data("gapminder")
+```
+
+Ejemplos
+```{r}
+puntajes <- saber11_2019 %>% select(starts_with("PUNT"))
+puntajes <- select(saber11_2019, starts_with("PUNT"))
+```
+mapply
+Aplica una función a los primeros elementos de cada argumento, a los segundos, a los terceros, y así sucesivamente. Los argumentos se reciclan si es necesario.
+```{r}
+str(mapply)
+```
+Ejemplo 1
+```{r}
+mapply(function(x,y){x^y},x=c(2,3),y=c(3,4))
+```
+
+Aplica la función definida por el usuario, aplicando el argumento de la segunda variable al argumento de la
+primera variable.
+
+Ejemplo 2
+
+Supongamos que tenemos tres de vectores:
+
+```{r}
+values1 <- list(a = c(1, 2, 3), b = c(13, 14, 15), c = c(27, 28))
+values2 <- list(d = c(10, 11, 12), e = c(13, 14, 15), f = c(16, 17, 18))
+values3 <- list(g = c(2, 4, 6, 8), h = c(11, 14, 16, 18), j = c(23, 25, 27, 21))
+```
+
+Observe que cada lista tiene el mismo número de elementos (tres), pero no son necesariamente de la misma
+longitud.
+
+A cada lista se le puede calcular el máximo:
+```{r}
+t(lapply(values1, max))
+```
+```{r}
+t(lapply(values2, max))
+```
+
+```{r}
+t(lapply(values3, max))
+```
+
+Se puede unir para observarlo mejor:
+```{r}
+cbind(lapply(values1, max), lapply(values2, max), lapply(values3, max))
+```
+
+Pero queremos obtener el valor máximo para cada trío. Para ello es útil la función mapply:
+
+```{r}
+mapply(function(num1, num2, num3) max(c(num1, num2, num3)), values1, values2, values3)
+```
+
+Para verificar, se puede unir para observar cómo es el máximo de cada trío de valores:
+```{r}
+cbind(lapply(values1, max), lapply(values2, max), lapply(values3, max), mapply(function(num1, num2, num3) max(c(num1, num2, num3)), values1, values2, values3))
+```
+
+tapply
+Aplica la función sobre subgrupos identificados mediante una variable tipo factor
+```{r}
+Edad <- c(rnorm(20, 10, 3), runif(20, 18, 62))
+Grupo <- gl(2, k = 20, labels = c('Niños', 'Adultos'))
+tapply(Edad, Grupo, min)
+```
+
+```{r}
+tapply(Edad, Grupo, max)
+```
+
