@@ -1,0 +1,200 @@
+---
+title: "Regresión lineal (monitoria)"
+author: "Nicolas"
+date: "6/10/2021"
+output: html_document
+---
+
+## Cargar paquetes:
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(lmtest)
+library(car)
+library(modelsummary)
+options(scipen = 999)
+```
+
+```{r}
+rm(list = ls())
+```
+
+### Símbolos clave para regresiones en R
+
++---------+----------------------------------------------------------------------------------------------------------------------------+
+| Símbolo | Uso                                                                                                                        |
++=========+============================================================================================================================+
+| \~      | Separa la variable dependiente de las independientes.                                                                      |
++---------+----------------------------------------------------------------------------------------------------------------------------+
+| \+      | Separa las variables independientes.                                                                                       |
++---------+----------------------------------------------------------------------------------------------------------------------------+
+| :       | Permite crear interacciones. Por ejemplo x\*z                                                                              |
++---------+----------------------------------------------------------------------------------------------------------------------------+
+| -1      | Quita el intercepto.                                                                                                       |
++---------+----------------------------------------------------------------------------------------------------------------------------+
+| I()     | Permite realizar operaciones aritméticas dentro de la regresión. Por ejemplo, una transformación logarítmica o cuadrática. |
++---------+----------------------------------------------------------------------------------------------------------------------------+
+
+### Funciones útiles para la regresión
+
++----------------+---------------------------------------------------------------------------------+
+| Función        | Uso                                                                             |
++================+=================================================================================+
+| summary()      | Muestra los resultados del modelo estimado.                                     |
++----------------+---------------------------------------------------------------------------------+
+| coefficients() | Muestra los coeficientes del modelo estimado.                                   |
++----------------+---------------------------------------------------------------------------------+
+| confint()      | Muestra intervalos de confianza.                                                |
++----------------+---------------------------------------------------------------------------------+
+| fitted()       | Muestra los valores predecidos por la regresión.                                |
++----------------+---------------------------------------------------------------------------------+
+| residuals()    | Muestra los residuales.                                                         |
++----------------+---------------------------------------------------------------------------------+
+| anova()        | Muestra la tabla de análisis de varianza.                                       |
++----------------+---------------------------------------------------------------------------------+
+| vcov()         | Muestra la matriz de covarianza.                                                |
++----------------+---------------------------------------------------------------------------------+
+| AIC()          | Muestra el criterio de información de Akaike.                                   |
++----------------+---------------------------------------------------------------------------------+
+| plot()         | Genera gráficos de diagnóstico.                                                 |
++----------------+---------------------------------------------------------------------------------+
+| predict()      | Usa la información de un modelo estimado para predecir valores en nuevos datos. |
++----------------+---------------------------------------------------------------------------------+
+
+Regresión Simple e Interpretación de Resultados
+
+La función para realizar regresiones en R es `lm()`. Por ejemplo, para realizar la regresión entre puntaje de Inflación y apertura, usaríamos la siguiente función:
+
+```{r}
+openess <- read_excel("Bases_de_datos/openess.xlsx")
+reg1 <- lm(inf ~ open, data=openess)
+summary(reg1)
+```
+
+## Regresión multiple (Agregar más variables)
+
+Para agregar más variables se usa el signo +. En la siguiente regresión se incluirá la variable lpcinc:
+
+```{r}
+reg1 <- lm(inf ~ open + lpcinc, data = openess)
+summary(reg1)
+```
+
+## Pruebas MELI/BLUE
+
+```{r}
+bptest(reg1)#H0:Varianza constante
+```
+
+```{r}
+vif(reg1) #correlación entre las variables (multicolinealidad)
+```
+
+```{r eval=FALSE, include=FALSE}
+testendog(reg1) #Correlación de la variables con el error (Variables omitidas)
+```
+
+## Regresión con transformación cuadrática
+
+```{r}
+reg2 <- lm(open ~ inf + lpcinc + lland + lland2 , data = openess) 
+summary(reg2)
+```
+
+**Si la variable lland2 no existiera, ¿como podriamos realizar la transformación cuadratica lland?**
+
+```{r}
+reg2 <- lm(open ~ inf + lpcinc + lland + I(lland^2) , data = openess) 
+summary(reg2)
+```
+
+La función `confint()`muestra los intervalos de confianza para los coeficientes de la regresión. Por defecto, la función muestra los coeficientes a un nivel de confianza del 95%.
+
+```{r}
+confint(reg2)
+```
+
+Para modificar el nivel de confianza se usa el argumento `level`, así:
+
+```{r}
+confint(reg2, level = .99)
+
+```
+
+## Transforación logaritmica de las variables
+
+```{r}
+hprice <- read_excel("Bases_de_datos/hprice.xlsx")
+```
+
+**Realicen la regresión: reg ln(price) ln(lotsize) sqrft bdrms**
+
+```{}
+```
+
+## Interacción y prueba AIC
+
+```{r}
+wage2 <- read_excel("Bases_de_datos/wage2.xlsx")
+```
+
+```{r}
+reg3<- lm(I(log(wage)) ~ educ + exper + tenure + married + black + urban, data = wage2)
+summary(reg3)
+```
+
+```{r}
+AIC(reg3)
+```
+
+```{r}
+reg4<- lm(I(log(wage)) ~ educ + exper + tenure + married + black + urban +
+       educ:urban,data = wage2)
+summary(reg4)
+```
+
+```{r}
+AIC(reg4)
+```
+
+Puntaje de matematicas de saber 11 en función de puntaje lenguaje, edad, sexo, correndo el modelo lineal en R con diagnostico, supuestos si los cumple y análisis de lso coeficientes
+
+```{r}
+library(readr)
+saber11_2019 <- read_delim("Bases_de_datos/saber11_2019.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+View(saber11_2019)
+```
+
+```{r}
+punt.mate <- lm(saber11_2019$PUNT_MATEMATICAS ~ saber11_2019$PUNT_LECTURA_CRITICA + saber11_2019$ESTU_FECHANACIMIENTO + saber11_2019$ESTU_GENERO)
+
+summary(punt.mate)
+```
+
+```{r}
+punt.mate <- lm(saber11_2019$PUNT_MATEMATICAS ~ saber11_2019$PUNT_LECTURA_CRITICA + saber11_2019$ESTU_FECHANACIMIENTO + saber11_2019$ESTU_GENERO)
+```
+
+```{r}
+library(readr)
+library(tidyverse)
+library(lubridate)
+saber11 <- read_delim("Bases_de_datos/saber11_2019.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+
+saber <- saber11 %>% slice_sample(prop = 0.05)
+
+#saber %<>%  mutate(ESTU_FECHANACIMIENTO = dmy(ESTU_FECHANACIMIENTO))
+saber <- saber %>%  mutate(ESTU_FECHANACIMIENTO = dmy(ESTU_FECHANACIMIENTO))
+
+#saber %<>% mutate(edad = Sys.Date() - saber$ESTU_FECHANACIMIENTO)
+saber <- saber %>% mutate(edad = Sys.Date() - saber$ESTU_FECHANACIMIENTO)
+
+punt.mat <- lm(saber$PUNT_MATEMATICAS ~ saber$PUNT_LECTURA_CRITICA + I(saber$edad/365) + saber$ESTU_GENERO)
+
+summary(punt.mat)
+
+```
+
